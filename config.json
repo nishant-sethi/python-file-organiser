@@ -1,0 +1,6 @@
+{
+  "FILE_EXTENSIONS": {
+    "images": ["jpg", "png", "jpeg"],
+    "docs": ["pdf", "docx", "txt"]
+  }
+}
