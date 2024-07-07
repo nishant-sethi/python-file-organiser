@@ -155,6 +155,10 @@ class FileManager:
         logging.info('Traversing directory: {}'.format(dir_path))
         error_file_list = []
         for dirpath, dirnames, filenames in os.walk(dir_path):
+            try:
+                os.listdir(dirpath)  # Check if it has permission to traverse the directory
+            except PermissionError:
+                os.chmod(dirpath, 0o777)  # Change the mode of the directory to grant permission
             for file_name in filenames:
                 filepath = get_file_path(dirpath, file_name)
                 logging.info('Moving file: {}'.format(filepath))
@@ -178,8 +182,13 @@ class FileManager:
         for folder in folders:
             path = get_file_path(dir_path, folder)
             if not is_path_exists(path):
-                path.mkdir(parents=True, exist_ok=True)
-                logging.info('Folder created: {}'.format(path))
+                try:
+                    os.makedirs(path, exist_ok=True)
+                    logging.info('Folder created: {}'.format(path))
+                except PermissionError:
+                    os.chmod(dir_path, 0o777)  # Change the mode of the directory to grant permission
+                    os.makedirs(path, exist_ok=True)
+                    logging.info('Folder created with changed permissions: {}'.format(path))
             else:
                 logging.info('Folder already exists: {}'.format(path))
         print('\n')
@@ -207,15 +216,27 @@ class FileManager:
             logging.info('Directory created: {}'.format(final_path))
 
         final_dest = get_file_path(final_path, file_name)
-        dest_path = shutil.move(src, final_dest)
-        logging.info('File moved to dest: {}'.format(dest_path))
-        return True
+        
+        try:
+            os.rename(src, final_dest)
+            logging.info('File moved to dest: {}'.format(final_dest))
+            return True
+        except PermissionError:
+            os.chmod(root, 0o777)  # Change the mode of the directory to grant permission
+            os.rename(src, final_dest)
+            logging.info('File moved to dest with changed permissions: {}'.format(final_dest))
+            return True
+        except Exception as e:
+            logging.error('Error moving file: {}'.format(file_name))
+            logging.error(str(e))
+            return False
 
 # Main function to execute the file management operations    
 def main(file_extension, rearrange, traverse_path):
     file_manager = FileManager(file_extension)
     # Create folders for images and documents
-    file_manager.create_folder(dict(file_extension).keys(), traverse_path)
+    file_extensions_with_files = (ext for ext in file_extension if any(file.endswith(ext) for file in os.listdir(traverse_path)))
+    file_manager.create_folder(file_extensions_with_files, traverse_path)
     logging.info('Path traversing: {}'.format(traverse_path))
     file_manager.traverse_directory(traverse_path)
     if rearrange:
