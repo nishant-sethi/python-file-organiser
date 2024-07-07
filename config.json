@@ -1,6 +1,51 @@
 {
-  "FILE_EXTENSIONS": {
-    "images": ["jpg", "png", "jpeg"],
-    "docs": ["pdf", "docx", "txt"]
-  }
+	"FILE_EXTENSIONS": {
+		"images": [
+			"jpg",
+			"png",
+			"jpeg",
+			"gif",
+			"HEIC",
+			"svg"
+		],
+		"docs": [
+			"pdf",
+			"docx",
+			"txt",
+			"xlsx",
+			"pptx",
+			"doc",
+			"pages",
+			"numbers",
+			"xls"
+		],
+		"installers": [
+			"dmg",
+			"exe"
+		],
+		"files": [
+			"json",
+			"zip",
+			"tar"
+		],
+		"media": [
+			"mp4",
+			"mov",
+			"m4a",
+			"mp3",
+			"wmv"
+		],
+		"mail": [
+			"eml"
+		],
+		"keynotes": [
+			"key"
+		],
+		"misc": [
+			"jam"
+		],
+		"cal_invites": [
+			"ics"
+		]
+	}
 }

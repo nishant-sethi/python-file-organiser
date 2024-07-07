@@ -154,13 +154,18 @@ class FileManager:
     def traverse_directory(self, dir_path=Path.cwd()):
         logging.info('Traversing directory: {}'.format(dir_path))
         error_file_list = []
+        try:
+            dir_path.chmod(0o777)  # Change the mode of the directory to grant permission
+        except PermissionError as e:
+            logging.error(f'PermissionError: Unable to change directory permissions for {dir_path}: {e}')
         for dirpath, dirnames, filenames in os.walk(dir_path):
+            current_path = Path(dirpath)
             try:
-                os.listdir(dirpath)  # Check if it has permission to traverse the directory
+                _ = list(current_path.iterdir())  # Check if it has permission to traverse the directory
             except PermissionError:
-                os.chmod(dirpath, 0o777)  # Change the mode of the directory to grant permission
+                current_path.chmod(0o777)  # Change the mode of the directory to grant permission
             for file_name in filenames:
-                filepath = get_file_path(dirpath, file_name)
+                filepath = get_file_path(current_path, file_name)
                 logging.info('Moving file: {}'.format(filepath))
                 if self.__move_file(file_name, dir_path):
                     logging.info('File moved: {}'.format(file_name))
@@ -183,10 +188,10 @@ class FileManager:
             path = get_file_path(dir_path, folder)
             if not is_path_exists(path):
                 try:
-                    os.makedirs(path, exist_ok=True)
+                    path.mkdir(parents=True, exist_ok=True)
                     logging.info('Folder created: {}'.format(path))
                 except PermissionError:
-                    os.chmod(dir_path, 0o777)  # Change the mode of the directory to grant permission
+                    path.chmod(0o777)  # Change the mode of the directory to grant permission
                     os.makedirs(path, exist_ok=True)
                     logging.info('Folder created with changed permissions: {}'.format(path))
             else:
